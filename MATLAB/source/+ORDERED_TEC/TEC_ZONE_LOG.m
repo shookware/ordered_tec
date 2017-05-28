@@ -177,7 +177,7 @@ classdef TEC_ZONE_LOG < ORDERED_TEC.TEC_ZONE_BASE
             buf = sprintf('\t<ZoneName>%s</ZoneName>', obj.ZoneName); obj.Xml_Text{end+1} = buf;
             buf = sprintf('\t<StrandId>%i</StrandId>', obj.StrandId); obj.Xml_Text{end+1} = buf;
             if obj.StrandId ~= -1
-                buf = sprintf('\t<SolutionTime>%le</SolutionTime>', obj.SolutionTime); obj.Xml_Text{end+1} = buf;
+                buf = sprintf('\t<SolutionTime>%e</SolutionTime>', obj.SolutionTime); obj.Xml_Text{end+1} = buf;
             end
             buf = sprintf('\t<Real_Dim>%i</Real_Dim>', obj.Real_Dim); obj.Xml_Text{end+1} = buf;
             buf = sprintf('\t<Org_Max> <I>%i</I> <J>%i</J> <K>%i</K> </Org_Max>', obj.Max(1), obj.Max(2), obj.Max(3)); obj.Xml_Text{end+1} = buf;
