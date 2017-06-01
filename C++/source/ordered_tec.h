@@ -11,6 +11,7 @@
 # include <sstream>
 # include <typeinfo>
 # include <cstdio>
+# include "tinyxml2.h"
 
 namespace ORDERED_TEC
 {
@@ -103,6 +104,8 @@ namespace ORDERED_TEC
 		void write_echo(std::ofstream &of = std::ofstream());
 		void write_json(int depth = 0, std::ofstream &of = std::ofstream());
 		void write_xml(int depth = 0, std::ofstream &of = std::ofstream());
+
+		void read_xml(const tinyxml2::XMLElement * file_root);
 	protected:
 		void gen_json();
 		void gen_xml();
@@ -125,6 +128,8 @@ namespace ORDERED_TEC
 		void write_echo(std::ofstream &of = std::ofstream());
 		void write_json(int depth = 0, std::ofstream &of = std::ofstream());
 		void write_xml(int depth = 0, std::ofstream &of = std::ofstream());
+
+		void read_xml(const tinyxml2::XMLElement * zone_root);
 	protected:
 		void gen_json();
 		void gen_xml();

@@ -15,21 +15,7 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <Text Include="ReadMe.txt" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="..\..\source\ordered_tec.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\source\tinyxml2.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-  </ItemGroup>
-  <ItemGroup>
-    <ClCompile Include="..\..\source\ordered_tec.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\source\tinyxml2.cpp">
+    <ClCompile Include="order_tec_test_11.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>

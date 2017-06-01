@@ -9,6 +9,7 @@
 # include <fstream>
 # include <sstream>
 # include <cstdio>
+# include <cstdlib>
 # include <ctime>
 
 # define TEC_INT32_S 4
@@ -195,6 +196,39 @@ void TEC_FILE_LOG::write_xml(int depth, std::ofstream &of)
 	}
 }
 
+void TEC_FILE_LOG::read_xml(const tinyxml2::XMLElement * file_root)
+{
+	FileName = file_root->Attribute("FileName");
+	FilePath = file_root->FirstChildElement("FilePath")->GetText();
+	Time_Begin = file_root->FirstChildElement("Time")->GetText();
+	file_root->FirstChildElement("UsingTime")->QueryDoubleText(&UsingTime);
+	Title = file_root->FirstChildElement("Title")->GetText();
+	file_root->FirstChildElement("FileType")->QueryIntText(&FileType);
+	const tinyxml2::XMLElement * temp;
+	temp = file_root->FirstChildElement("Variables")->FirstChildElement();
+	while (temp)
+	{
+		Variables.push_back(temp->Name());
+		temp = temp->NextSiblingElement();
+	}
+	temp = file_root->FirstChildElement("Auxiliary")->FirstChildElement();
+	while (temp)
+	{
+		Auxiliary[temp->Name()] = temp->GetText();
+		temp = temp->NextSiblingElement();
+	}
+	temp = file_root->FirstChildElement("Zones")->FirstChildElement();
+	while (temp)
+	{
+		Zones.push_back(TEC_ZONE_LOG());
+		(Zones.end() - 1)->read_xml(temp);
+		temp = temp->NextSiblingElement();
+	}
+
+	gen_xml();
+	gen_json();
+}
+
 void TEC_FILE_LOG::gen_json()
 {
 	char buf[200];
@@ -274,13 +308,13 @@ void TEC_FILE_LOG::gen_xml()
 
 	if (Auxiliary.size() != 0)
 	{
-		Xml_Text.push_back("\t<Auxiliarys>");
+		Xml_Text.push_back("\t<Auxiliary>");
 		for (std::map<std::string, std::string>::const_iterator i = Auxiliary.begin(); i != Auxiliary.end(); ++i)
 		{
 			std::sprintf(buf, "\t\t<%s>%s</%s>", i->first.c_str(), i->second.c_str(), i->first.c_str());
 			Xml_Text.push_back(buf);
 		}
-		Xml_Text.push_back("\t</Auxiliarys>");
+		Xml_Text.push_back("\t</Auxiliary>");
 	}
 
 	Xml_Text.push_back("\t<Zones>");
@@ -379,6 +413,69 @@ void TEC_ZONE_LOG::write_xml(int depth, std::ofstream &of)
 	}
 }
 
+void TEC_ZONE_LOG::read_xml(const tinyxml2::XMLElement * zone_root)
+{
+	ZoneName = zone_root->FirstChildElement("ZoneName")->GetText();
+	zone_root->FirstChildElement("StrandId")->QueryIntText(&StrandId);
+	if (StrandId != -1)
+	{
+		zone_root->FirstChildElement("SolutionTime")->QueryDoubleText(&SolutionTime);
+	}
+	zone_root->FirstChildElement("Org_Dim")->QueryIntText(&Dim);
+	zone_root->FirstChildElement("Real_Dim")->QueryIntText(&Real_Dim);
+	const tinyxml2::XMLElement * temp;
+	temp = zone_root->FirstChildElement("Org_Max")->FirstChildElement();
+	for (size_t i = 0; temp; ++i)
+	{
+		temp->QueryIntText(Max + i);
+		temp = temp->NextSiblingElement();
+	}
+	temp = zone_root->FirstChildElement("Skip")->FirstChildElement();
+	for (size_t i = 0; temp; ++i)
+	{
+		temp->QueryIntText(Skip + i);
+		temp = temp->NextSiblingElement();
+	}
+	temp = zone_root->FirstChildElement("Begin")->FirstChildElement();
+	for (size_t i = 0; temp; ++i)
+	{
+		temp->QueryIntText(Begin + i);
+		temp = temp->NextSiblingElement();
+	}
+	temp = zone_root->FirstChildElement("End")->FirstChildElement();
+	for (size_t i = 0; temp; ++i)
+	{
+		temp->QueryIntText(End + i);
+		temp = temp->NextSiblingElement();
+	}
+	temp = zone_root->FirstChildElement("Real_Max")->FirstChildElement();
+	for (size_t i = 0; temp; ++i)
+	{
+		temp->QueryIntText(Real_Max + i);
+		temp = temp->NextSiblingElement();
+	}
+	temp = zone_root->FirstChildElement("Auxiliary")->FirstChildElement();
+	while (temp)
+	{
+		Auxiliary[temp->Name()] = temp->GetText();
+		temp = temp->NextSiblingElement();
+	}
+	temp = zone_root->FirstChildElement("Datas")->FirstChildElement();
+	while (temp)
+	{
+		Data.push_back(TEC_DATA_LOG());
+		int tp_temp;
+		temp->QueryIntAttribute("type", &tp_temp);
+		(Data.end() - 1)->type = TEC_DATA_BASE::TEC_TYPE(tp_temp);
+		temp->QueryUnsignedAttribute("size_i", &((Data.end() - 1)->size));
+		std::string pt_temp = temp->Attribute("file_pt");
+		(Data.end() - 1)->file_pt = std::strtol(pt_temp.c_str(),'\0',10);
+		temp->QueryDoubleAttribute("min", &((Data.end() - 1)->min));
+		temp->QueryDoubleAttribute("max", &((Data.end() - 1)->max));
+		temp = temp->NextSiblingElement();
+	}
+}
+
 void TEC_ZONE_LOG::gen_json()
 {
 	char buf[200];
@@ -391,6 +488,7 @@ void TEC_ZONE_LOG::gen_json()
 	{
 		std::sprintf(buf, "\t\"SolutionTime\" : %le ,", SolutionTime); Json_Text.push_back(buf);
 	}
+	std::sprintf(buf, "\t\"Org_Dim\" : %i ,", Dim); Json_Text.push_back(buf);
 	std::sprintf(buf, "\t\"Real_Dim\" : %i ,", Real_Dim); Json_Text.push_back(buf);
 	std::sprintf(buf, "\t\"Org_Max\" : [ %i, %i, %i ] ,", Max[0], Max[1], Max[2]); Json_Text.push_back(buf);
 	std::sprintf(buf, "\t\"Skip\" : [ %i, %i, %i ] ,", Skip[0], Skip[1], Skip[2]); Json_Text.push_back(buf);
@@ -443,6 +541,7 @@ void TEC_ZONE_LOG::gen_xml()
 	{
 		std::sprintf(buf, "\t<SolutionTime>%le</SolutionTime>", SolutionTime); Xml_Text.push_back(buf);
 	}
+	std::sprintf(buf, "\t<Org_Dim>%i</Org_Dim>", Dim); Xml_Text.push_back(buf);
 	std::sprintf(buf, "\t<Real_Dim>%i</Real_Dim>", Real_Dim); Xml_Text.push_back(buf);
 	std::sprintf(buf, "\t<Org_Max> <I>%i</I> <J>%i</J> <K>%i</K> </Org_Max>", Max[0], Max[1], Max[2]); Xml_Text.push_back(buf);
 	std::sprintf(buf, "\t<Skip> <I>%i</I> <J>%i</J> <K>%i</K> </Skip>", Skip[0], Skip[1], Skip[2]); Xml_Text.push_back(buf);
