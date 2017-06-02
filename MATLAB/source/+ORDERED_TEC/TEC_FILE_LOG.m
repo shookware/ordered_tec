@@ -138,6 +138,53 @@ classdef TEC_FILE_LOG < ORDERED_TEC.TEC_FILE_BASE
             end
         end
         
+        function obj = read_xml(obj,file_root)
+            obj.FileName = char(file_root.getAttribute('FileName'));
+            obj.FilePath = char(file_root.getElementsByTagName('FilePath').item(0).getTextContent);
+            obj.Time_Begin = char(file_root.getElementsByTagName('Time').item(0).getTextContent);
+            obj.UsingTime = str2double(file_root.getElementsByTagName('UsingTime').item(0).getTextContent);
+            obj.Title = char(file_root.getElementsByTagName('Title').item(0).getTextContent);
+            obj.FileType = str2double(file_root.getElementsByTagName('FileType').item(0).getTextContent);
+            
+            temp = file_root.getElementsByTagName('Variables').item(0).getFirstChild;
+            v_n = 0;
+            while ~isempty(temp)
+                if temp.getNodeType~=temp.TEXT_NODE
+                    v_n = v_n + 1;
+                    obj.Variables{v_n} = char(temp.getNodeName);
+                end
+                temp = temp.getNextSibling;
+            end
+            
+            temp = file_root.getElementsByTagName('Auxiliary');
+            if temp.getLength~=0
+                temp = temp.item(0).getFirstChild;
+                v_n = 0;
+                while ~isempty(temp)
+                    if temp.getNodeType~=temp.TEXT_NODE
+                        v_n = v_n + 1;
+                        obj.Auxiliary{v_n} = {char(temp.getNodeName), char(temp.getTextContent)};
+                    end
+                    temp = temp.getNextSibling;
+                end
+            end
+            
+            temp = file_root.getElementsByTagName('Zones').item(0).getFirstChild;
+            obj.Zones = ORDERED_TEC.TEC_ZONE_LOG;
+            v_n = 0;
+            while ~isempty(temp)
+                if temp.getNodeType~=temp.TEXT_NODE
+                    v_n = v_n + 1;
+                    obj.Zones(v_n) = ORDERED_TEC.TEC_ZONE_LOG;
+                    obj.Zones(v_n) = obj.Zones(v_n).read_xml(temp);
+                end
+                temp = temp.getNextSibling;
+            end
+            
+            obj = obj.gen_xml();
+            obj = obj.gen_json();
+        end
+        
     end
     
     methods (Hidden = true)
@@ -206,12 +253,12 @@ classdef TEC_FILE_LOG < ORDERED_TEC.TEC_FILE_BASE
             obj.Xml_Text{end} = [obj.Xml_Text{end},' </Variables>'];
             
             if ~isempty(obj.Auxiliary)
-                buf  = sprintf('\t<Auxiliarys>'); obj.Xml_Text{end+1} = buf;
+                buf  = sprintf('\t<Auxiliary>'); obj.Xml_Text{end+1} = buf;
                 for kk = 1:length(obj.Auxiliary)
                     buf = sprintf('\t\t<%s>%s</%s>',obj.Auxiliary{kk}{1},obj.Auxiliary{kk}{2},obj.Auxiliary{kk}{1});
                     obj.Xml_Text{end+1} = buf;
                 end
-                buf  = sprintf('\t</Auxiliarys>'); obj.Xml_Text{end+1} = buf;
+                buf  = sprintf('\t</Auxiliary>'); obj.Xml_Text{end+1} = buf;
             end
             
             buf = sprintf('\t<Zones>'); obj.Xml_Text{end+1} = buf;
