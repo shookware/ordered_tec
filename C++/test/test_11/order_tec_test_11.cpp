@@ -46,8 +46,6 @@ int main(int argc, char **argv)
 	tecfile.Zones[0].Data.push_back(ORDERED_TEC::TEC_DATA(x));
 	tecfile.Zones[0].Data.push_back(ORDERED_TEC::TEC_DATA(y));
 	tecfile.Zones[0].Data.push_back(ORDERED_TEC::TEC_DATA(z));
-	tecfile.Zones[0].add_auxiliary_data("Auxiliary1", "Auxiliary_test_1");
-	tecfile.Zones[0].add_auxiliary_data("Auxiliary2", 3.14);
 
 	tecfile.Zones.push_back(tecfile.Zones[0]);
 	tecfile.Zones[1].Begin[0] = 5;

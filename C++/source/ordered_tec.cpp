@@ -211,11 +211,14 @@ void TEC_FILE_LOG::read_xml(const tinyxml2::XMLElement * file_root)
 		Variables.push_back(temp->Name());
 		temp = temp->NextSiblingElement();
 	}
-	temp = file_root->FirstChildElement("Auxiliary")->FirstChildElement();
-	while (temp)
+	if (file_root->FirstChildElement("Auxiliary"))
 	{
-		Auxiliary[temp->Name()] = temp->GetText();
-		temp = temp->NextSiblingElement();
+		temp = file_root->FirstChildElement("Auxiliary")->FirstChildElement();
+		while (temp)
+		{
+			Auxiliary[temp->Name()] = temp->GetText();
+			temp = temp->NextSiblingElement();
+		}
 	}
 	temp = file_root->FirstChildElement("Zones")->FirstChildElement();
 	while (temp)
@@ -454,11 +457,14 @@ void TEC_ZONE_LOG::read_xml(const tinyxml2::XMLElement * zone_root)
 		temp->QueryIntText(Real_Max + i);
 		temp = temp->NextSiblingElement();
 	}
-	temp = zone_root->FirstChildElement("Auxiliary")->FirstChildElement();
-	while (temp)
+	if (zone_root->FirstChildElement("Auxiliary"))
 	{
-		Auxiliary[temp->Name()] = temp->GetText();
-		temp = temp->NextSiblingElement();
+		temp = zone_root->FirstChildElement("Auxiliary")->FirstChildElement();
+		while (temp)
+		{
+			Auxiliary[temp->Name()] = temp->GetText();
+			temp = temp->NextSiblingElement();
+		}
 	}
 	temp = zone_root->FirstChildElement("Datas")->FirstChildElement();
 	while (temp)
