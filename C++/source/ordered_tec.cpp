@@ -1,42 +1,46 @@
-# include "ordered_tec.h"
+#include<cstddef>
+#include<string>
+#include<vector>
+#include<map>
+#include<bitset>
+#include<fstream>
+#include<sstream>
+#include<typeinfo>
+#include<stdexcept>
+#include"tinyxml2.h"
 
-# include <string>
-# include <vector>
-# include <map>
-# include <cstring>
-# include <stdexcept>
-# include <iostream>
-# include <fstream>
-# include <sstream>
-# include <cstdio>
-# include <cstdlib>
-# include <ctime>
+#include<iostream>
+#include<cstdio>
+#include<ctime>
+#include<cerrno>
 
-# define TEC_INT32_S 4
-# define TEC_FLOAT32_S 4
-# define TEC_FLOAT64_S 8
+#include"ordered_tec.h"
+
+#define TEC_INT32_S 4
+#define TEC_FLOAT32_S 4
+#define TEC_FLOAT64_S 8
 
 using namespace ORDERED_TEC;
 
-void W_INT32(const INT32 &a, FILE *f)
+inline void W_INT32(const INT32 &a, FILE *f)
 {
 	INT32 t = a;
 	std::fwrite(&t, TEC_INT32_S, 1, f);
 }
 
-void W_FLOAT32(const FLOAT32 &a, FILE *f)
+inline void W_FLOAT32(const FLOAT32 &a, FILE *f)
 {
 	FLOAT32 t = a;
 	std::fwrite(&t, TEC_FLOAT32_S, 1, f);
 }
 
-void W_FLOAT64(const FLOAT64 &a, FILE *f)
+inline void W_FLOAT64(const FLOAT64 &a, FILE *f)
 {
 	FLOAT64 t = a;
 	std::fwrite(&t, TEC_FLOAT64_S, 1, f);
 }
 
-void W_STRING(const std::string &a, FILE *f)
+inline void W_STRING(const std::string &a, FILE *f)
 {
 	for (std::string::const_iterator i = a.begin(); i != a.end(); ++i)
 	{
@@ -45,7 +49,7 @@ void W_STRING(const std::string &a, FILE *f)
 	W_INT32(0, f);
 }
 
-std::string get_time(const std::string &format = "%Y%m%dT%H%M%S")
+inline std::string get_time(const std::string &format = "%Y%m%dT%H%M%S")
 {
 	time_t time_c = std::time(NULL);
 	struct tm tm_c;
@@ -59,7 +63,7 @@ std::string get_time(const std::string &format = "%Y%m%dT%H%M%S")
 	return buf;
 }
 
-FILE * openfile(const std::string &fullname, const char* mode)
+inline FILE * openfile(const std::string &fullname, const char* mode)
 {
 # ifdef __linux__
 	FILE *of;
@@ -304,7 +308,7 @@ void TEC_FILE_LOG::gen_xml()
 	Xml_Text.push_back("\t<Variables>");
 	for (std::vector<std::string>::const_iterator i = Variables.begin(); i != Variables.end(); ++i)
 	{
-		std::sprintf(buf, " <%s i=\"%zi\"/>", i->c_str(), i - Variables.begin());
+		std::sprintf(buf, " <%s i=\"%i\"/>", i->c_str(), int(i - Variables.begin()));
 		*(Xml_Text.end() - 1) += buf;
 	}
 	*(Xml_Text.end() - 1) += " </Variables>";
@@ -522,8 +526,8 @@ void TEC_ZONE_LOG::gen_json()
 	Json_Text.push_back("\t\"Data\" : [");
 	for (std::vector<TEC_DATA_LOG>::const_iterator i = Data.begin(); i != Data.end(); ++i)
 	{
-		std::sprintf(buf, "\t\t{ \"type\":%i, \"size_i\":%zi, \"file_pt\":%li, \"min\":%lf, \"max\":%lf }",
-			i->type, i->size, Data[i - Data.begin()].file_pt, Data[i - Data.begin()].min, Data[i - Data.begin()].max);
+		std::sprintf(buf, "\t\t{ \"type\":%i, \"size_i\":%i, \"file_pt\":%li, \"min\":%le, \"max\":%le }",
+			i->type, int(i->size), Data[i - Data.begin()].file_pt, Data[i - Data.begin()].min, Data[i - Data.begin()].max);
 		Json_Text.push_back(buf);
 		if (Data.end() - i != 1)
 		{
@@ -570,8 +574,8 @@ void TEC_ZONE_LOG::gen_xml()
 	Xml_Text.push_back("\t<Datas>");
 	for (std::vector<TEC_DATA_LOG>::iterator i = Data.begin(); i != Data.end(); ++i)
 	{
-		std::sprintf(buf, "\t\t<Data_%zi type=\"%i\" size_i=\"%zi\" file_pt=\"%li\" min=\"%lf\" max=\"%lf\"/>",
-			i - Data.begin(), i->type, i->size, Data[i - Data.begin()].file_pt, Data[i - Data.begin()].min, Data[i - Data.begin()].max);
+		std::sprintf(buf, "\t\t<Data_%i type=\"%i\" size_i=\"%i\" file_pt=\"%li\" min=\"%le\" max=\"%le\"/>",
+			int(i - Data.begin()), i->type, int(i->size), Data[i - Data.begin()].file_pt, Data[i - Data.begin()].min, Data[i - Data.begin()].max);
 		Xml_Text.push_back(buf);
 	}
 	Xml_Text.push_back("\t</Datas>");
@@ -637,10 +641,10 @@ void TEC_FILE::write_plt(bool echo)
 	{
 		of = openfile(FilePath + "/" + FileName + ".plt", "wb");
 	}
-	catch (std::runtime_error &err)
+	catch (const std::exception& err)
 	{
 		last_log.Error = err.what();
-		throw std::runtime_error(err);
+		throw std::runtime_error(err.what());
 	}
 	if (Echo_Mode.test(0))
 	{
@@ -742,7 +746,7 @@ void TEC_FILE::echo_mode(const std::string &iecho)
 	{
 		Echo_Mode = std::bitset<7>(e_m);
 	}
-	catch (...)
+	catch (const std::exception&)
 	{
 		throw std::runtime_error("File(" + FileName + "): echo code wrong");
 	}
@@ -767,7 +771,7 @@ void TEC_FILE::wrtie_plt_pre()
 			last_log.Zones.push_back(TEC_ZONE_LOG(*i));
 			i->wrtie_plt_pre(*this, *(last_log.Zones.end()-1));
 		}
-		catch (std::runtime_error &err)
+		catch (const std::exception&err)
 		{
 			last_log.Error = "File(" + FileName + ")." + err.what();
 			throw std::runtime_error("File(" + FileName + ")." + err.what());
@@ -925,7 +929,7 @@ void TEC_ZONE::echo_mode(const std::string &iecho)
 	{
 		Echo_Mode = std::bitset<9>(e_m);
 	}
-	catch (...)
+	catch (const std::exception&)
 	{
 		throw std::runtime_error("Zone(" + ZoneName + "): echo code wrong");
 	}
@@ -998,9 +1002,9 @@ void TEC_ZONE::make_buf()
 			{
 				i->buf = new byte[Real_Max[0]*Real_Max[1]*Real_Max[2]*size];
 			}
-			catch (...)
+			catch (const std::exception&err)
 			{
-				throw std::runtime_error("out of memory");
+				throw std::runtime_error(std::string("maybe out of memory: ") + err.what());
 			}
 			for(INT32 sk=Begin[2];sk<Max[2]-End[2];sk+=Skip[2])
 			{
@@ -1023,9 +1027,9 @@ void TEC_ZONE::make_buf()
 			{
 				i->buf = new byte[Real_Max[0]*Real_Max[1]*Real_Max[2]*size];
 			}
-			catch (...)
+			catch (const std::exception&err)
 			{
-				throw std::runtime_error("out of memory");
+				throw std::runtime_error(std::string("maybe out of memory: ") + err.what());
 			}
 			for(INT32 sk=Begin[2];sk<Max[2]-End[2];sk+=Skip[2])
 			{

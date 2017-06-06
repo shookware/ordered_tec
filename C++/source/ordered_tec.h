@@ -1,17 +1,16 @@
 # ifndef ORDERED_TEC_HEAD
 # define ORDERED_TEC_HEAD
 
-# include <string>
-# include <vector>
-# include <map>
-# include <stdexcept>
-# include <bitset>
-# include <iostream>
-# include <fstream>
-# include <sstream>
-# include <typeinfo>
-# include <cstdio>
-# include "tinyxml2.h"
+#include<cstddef>
+#include<string>
+#include<vector>
+#include<map>
+#include<bitset>
+#include<fstream>
+#include<sstream>
+#include<typeinfo>
+#include<stdexcept>
+#include"tinyxml2.h"
 
 namespace ORDERED_TEC
 {
