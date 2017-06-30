@@ -60,21 +60,21 @@ int main(int argc, char **argv)
 	tecfile.Zones[1].add_auxiliary_data("Auxiliary3", "Auxiliary_test_1_2");
 	tecfile.Zones[1].add_auxiliary_data("Auxiliary4", 3.1415);
 
-	cout << tecfile.last_log.FileName << endl;
-	cout << tecfile.last_log.FilePath << endl;
-	cout << tecfile.last_log.FileType << endl;
-	cout << tecfile.last_log.Title << endl;
-	cout << tecfile.last_log.Error << endl;
-	cout << tecfile.last_log.Size << endl;
-	cout << tecfile.last_log.Time_Begin << endl;
-	cout << tecfile.last_log.Time_End << endl;
-	cout << tecfile.last_log.UsingTime << endl;
-	cout << tecfile.last_log.Variables.size() << endl;
-	cout << tecfile.last_log.Auxiliary.size() << endl;
-	cout << tecfile.last_log.Echo_Text.size() << endl;
-	cout << tecfile.last_log.Json_Text.size() << endl;
-	cout << tecfile.last_log.Xml_Text.size() << endl;
-	cout << tecfile.last_log.Zones.size() << endl;
+	cout << "FileName " << tecfile.last_log.FileName << endl;
+	cout << "FilePath " << tecfile.last_log.FilePath << endl;
+	cout << "FileType " << tecfile.last_log.FileType << endl;
+	cout << "Title " << tecfile.last_log.Title << endl;
+	cout << "Error " << tecfile.last_log.Error << endl;
+	cout << "Size " << tecfile.last_log.Size << endl;
+	cout << "Time_Begin " << tecfile.last_log.Time_Begin << endl;
+	cout << "Time_End " << tecfile.last_log.Time_End << endl;
+	cout << "UsingTime " << tecfile.last_log.UsingTime << endl;
+	cout << "Variables.size " << tecfile.last_log.Variables.size() << endl;
+	cout << "Auxiliary.size " << tecfile.last_log.Auxiliary.size() << endl;
+	cout << "Echo_Text.size " << tecfile.last_log.Echo_Text.size() << endl;
+	cout << "Json_Text.size " << tecfile.last_log.Json_Text.size() << endl;
+	cout << "Xml_Text.size " << tecfile.last_log.Xml_Text.size() << endl;
+	cout << "Zones.size " << tecfile.last_log.Zones.size() << endl;
 
 	try
 	{
