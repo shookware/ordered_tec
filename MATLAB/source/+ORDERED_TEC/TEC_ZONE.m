@@ -14,7 +14,7 @@ classdef TEC_ZONE < ORDERED_TEC.TEC_ZONE_BASE
                 obj.StrandId = -1;
                 obj.SolutionTime = 0;
                 obj.Skip = [1,1,1];
-                obj.Begin = [1,1,1];
+                obj.Begin = [0,0,0];
                 obj.EEnd = [0,0,0];
                 obj.Echo_Mode = 'brief';
             elseif nargin==1
@@ -83,7 +83,7 @@ classdef TEC_ZONE < ORDERED_TEC.TEC_ZONE_BASE
                         'the Skip of zone is not possitive integer:[%s]',num2str(obj.Skip));
                     throw(ME);
                 end
-                if any(obj.Begin<=0 | mod(obj.Begin,1)~=0)
+                if any(obj.Begin<0 | mod(obj.Begin,1)~=0)
                     ME = MException('TEC_ZONE:RuntimeError', ...
                         'the Begin of zone is not possitive integer:[%s]',num2str(obj.Begin));
                     throw(ME);
@@ -97,12 +97,12 @@ classdef TEC_ZONE < ORDERED_TEC.TEC_ZONE_BASE
                 if any(Real_Max<=0)
                     ME = MException('TEC_ZONE:RuntimeError', ...
                         'sum of Begin and EEnd is not smaller than Max:[%s]+[%s]>=[%s]', ...
-                        num2str(obj.Begin-1),num2str(obj.EEnd),num2str(real_ijk(size(obj.Data{n}),[1,1,1],[1,1,1],[0,0,0])));
+                        num2str(obj.Begin),num2str(obj.EEnd),num2str(real_ijk(size(obj.Data{n}),[1,1,1],[0,0,0],[0,0,0])));
                     throw(ME);
                 end
                 Real_Dim = find(Real_Max~=1,1,'last');
                 noskip = isequal(obj.Skip,[1,1,1]);
-                noexc = isequal(obj.Begin,[1,1,1]) && isequal(obj.EEnd,[0,0,0]);
+                noexc = isequal(obj.Begin,[0,0,0]) && isequal(obj.EEnd,[0,0,0]);
             else
                 ME = MException('TEC_ZONE:NArgInWrong', 'too many input arguments');
                 throw(ME);
@@ -309,7 +309,6 @@ function rijk = real_ijk(ijk,skip,begin,eend)
 if length(ijk)==2
     ijk = [ijk,1];
 end
-begin = begin-[1,1,1];
 rijk=(ijk-begin-eend)./skip;
 rijk=floor(rijk);
 rijk(mod(ijk-begin-eend,skip)~=0)=rijk(mod(ijk-begin-eend,skip)~=0)+1;
@@ -318,12 +317,12 @@ end
 function buf = makebuf(data,skip,begin,eend)
 % make buffer data from an array with its Skip, Begin and EEnd
 
-if isequal(skip,[1,1,1]) && isequal(begin,[1,1,1]) && isequal(eend,[0,0,0])
+if isequal(skip,[1,1,1]) && isequal(begin,[0,0,0]) && isequal(eend,[0,0,0])
     buf = data;
 else
-    buf=data(begin(1):skip(1):end-eend(1), ...
-        begin(2):skip(2):end-eend(2), ...
-        begin(3):skip(3):end-eend(3));
+    buf=data(1+begin(1):skip(1):end-eend(1), ...
+        1+begin(2):skip(2):end-eend(2), ...
+        1+begin(3):skip(3):end-eend(3));
 end
 if isempty(buf)
     ME = MException('TEC_ZONE:ErrorVariable','one of Skip or Begin or EEnd is error');

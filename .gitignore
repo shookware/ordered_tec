@@ -53,3 +53,6 @@ C++/test/test_11/test_11.txt
 C++/test/test_11/test_11.xml
 MATLAB/test/ordered_tec_test_10/test_10.txt
 MATLAB/test/ordered_tec_test_10/test_10.xml
+MATLAB/test/ordered_tec_test_05/test_05.xml
+MATLAB/test/ordered_tec_test_05/test_05/test_05_grid.xml
+MATLAB/test/ordered_tec_test_09/test_09.xml
