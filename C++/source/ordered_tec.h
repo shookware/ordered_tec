@@ -7,7 +7,6 @@
 #include<map>
 #include<bitset>
 #include<fstream>
-#include<sstream>
 #include<typeinfo>
 #include<stdexcept>
 #include"tinyxml2.h"
@@ -241,9 +240,9 @@ template<typename T> ORDERED_TEC::TEC_DATA::TEC_DATA(T * iDataP)
 	}
 	else
 	{
-		std::ostringstream err;
-		err << "type [" << typeid(T).name() << "]*" << sizeof(T) << " is unsupported in Tecplot";
-		throw(std::runtime_error(err.str()));
+		char buf[300];
+		std::sprintf(buf, "type [%s]*%i is unsupported in Tecplot", typeid(T).name(), static_cast<int>(sizeof(T)));
+		throw(std::runtime_error(buf));
 	}
 	DataP = iDataP;
 	buf = NULL;

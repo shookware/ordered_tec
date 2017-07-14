@@ -4,16 +4,12 @@
 #include<map>
 #include<bitset>
 #include<fstream>
-#include<sstream>
-#include<typeinfo>
 #include<stdexcept>
-#include"tinyxml2.h"
-
-#include<iostream>
 #include<cstdio>
 #include<ctime>
 #include<cerrno>
 
+#include"tinyxml2.h"
 #include"ordered_tec.h"
 
 #define TEC_INT32_S 4
@@ -607,9 +603,9 @@ bool TEC_FILE::add_auxiliary_data(const std::string &name,const std::string &val
 
 bool TEC_FILE::add_auxiliary_data(const std::string &name,const double &value)
 {
-	std::ostringstream ss;
-	ss << value;
-	return add_auxiliary_data(name,ss.str());
+	char buf[200];
+	std::sprintf(buf, "%lf", value);
+	return add_auxiliary_data(name, buf);
 }
 
 void TEC_FILE::set_echo_mode(const std::string &file, const std::string &zone)
@@ -901,9 +897,9 @@ bool TEC_ZONE::add_auxiliary_data(const std::string &name, const std::string &va
 
 bool TEC_ZONE::add_auxiliary_data(const std::string &name, const double &value)
 {
-	std::stringstream ss;
-	ss<<value;
-	return add_auxiliary_data(name,ss.str());
+	char buf[200];
+	std::sprintf(buf, "%lf", value);
+	return add_auxiliary_data(name, buf);
 }
 
 void TEC_ZONE::echo_mode(const std::string &iecho)
