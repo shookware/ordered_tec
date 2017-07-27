@@ -99,9 +99,12 @@ namespace ORDERED_TEC
 		TEC_FILE_LOG();
 		explicit TEC_FILE_LOG(const TEC_FILE &file);
 
-		void write_echo(std::ofstream &of = std::ofstream());
-		void write_json(int depth = 0, std::ofstream &of = std::ofstream());
-		void write_xml(int depth = 0, std::ofstream &of = std::ofstream());
+		void write_echo();
+		void write_echo(std::ofstream &of);
+		void write_json(int depth = 0);
+		void write_json(std::ofstream &of, int depth = 0);
+		void write_xml(int depth = 0);
+		void write_xml(std::ofstream &of, int depth = 0);
 
 		void read_xml(const tinyxml2::XMLElement * file_root);
 	protected:
@@ -123,9 +126,12 @@ namespace ORDERED_TEC
 		TEC_ZONE_LOG();
 		explicit TEC_ZONE_LOG(const TEC_ZONE &zone);
 
-		void write_echo(std::ofstream &of = std::ofstream());
-		void write_json(int depth = 0, std::ofstream &of = std::ofstream());
-		void write_xml(int depth = 0, std::ofstream &of = std::ofstream());
+		void write_echo();
+		void write_echo(std::ofstream &of);
+		void write_json(int depth = 0);
+		void write_json(std::ofstream &of, int depth = 0);
+		void write_xml(int depth = 0);
+		void write_xml(std::ofstream &of, int depth = 0);
 
 		void read_xml(const tinyxml2::XMLElement * zone_root);
 	protected:

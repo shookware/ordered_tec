@@ -109,8 +109,8 @@ int main(int argc,char **argv)
 		try
 		{
 			tecfile.write_plt();
-			tecfile.last_log.write_json(1, of_j);
-			tecfile.last_log.write_xml(1, of_x);
+			tecfile.last_log.write_json(of_j, 1);
+			tecfile.last_log.write_xml(of_x, 1);
 		}
 		catch(std::runtime_error err)
 		{

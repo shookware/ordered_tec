@@ -84,7 +84,7 @@ int main(int argc, char **argv)
 		log.read_xml(doc.FirstChildElement("File"));
 		ofstream out("read.xml");
 		out << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" << endl;
-		log.write_xml(0,out);
+		log.write_xml(out);
 		out.close();
 	}
 	catch (const std::exception& err)

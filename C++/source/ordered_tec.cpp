@@ -88,19 +88,20 @@ TEC_FILE_LOG::TEC_FILE_LOG()
 
 TEC_FILE_LOG::TEC_FILE_LOG(const TEC_FILE & file) : TEC_FILE_BASE(file) {}
 
+void TEC_FILE_LOG::write_echo()
+{
+	std::ofstream of;
+	of.open((FilePath + "/" + FileName + ".txt").c_str());
+	if (!of)
+	{
+		throw std::runtime_error(std::string("can not open file ") + (FilePath + "/" + FileName + ".txt"));
+	}
+	write_echo(of);
+	of.close();
+}
+
 void TEC_FILE_LOG::write_echo(std::ofstream &of)
 {
-	bool newfile = !of.is_open();
-	if (newfile)
-	{
-		of.clear();
-		of.open((FilePath + "/" + FileName + ".txt").c_str());
-		if (!of)
-		{
-			throw std::runtime_error(std::string("can not open file ") + (FilePath + "/" + FileName + ".txt"));
-		}
-	}
-
 	std::vector<TEC_ZONE_LOG>::iterator zi = Zones.begin();
 	for (std::vector<std::string>::iterator i = Echo_Text.begin(); i != Echo_Text.end(); ++i)
 	{
@@ -114,32 +115,28 @@ void TEC_FILE_LOG::write_echo(std::ofstream &of)
 			of << i->c_str() << std::endl;
 		}
 	}
-
-	if (newfile)
-	{
-		of.close();
-	}
 }
 
-void TEC_FILE_LOG::write_json(int depth, std::ofstream &of)
+void TEC_FILE_LOG::write_json(int depth)
 {
-	bool newfile = !of.is_open();
-	if (newfile)
+	std::ofstream of;
+	of.open((FilePath + "/" + FileName + ".json").c_str());
+	if (!of)
 	{
-		of.clear();
-		of.open((FilePath + "/" + FileName + ".json").c_str());
-		if (!of)
-		{
-			throw std::runtime_error(std::string("can not open file ") + (FilePath + "/" + FileName + ".json"));
-		}
+		throw std::runtime_error(std::string("can not open file ") + (FilePath + "/" + FileName + ".json"));
 	}
+	write_json(of, depth);
+	of.close();
+}
 
+void TEC_FILE_LOG::write_json(std::ofstream &of, int depth)
+{
 	std::vector<TEC_ZONE_LOG>::iterator zi = Zones.begin();
 	for (std::vector<std::string>::iterator i = Json_Text.begin(); i != Json_Text.end(); ++i)
 	{
 		if (i->compare("#ZONE#") == 0)
 		{
-			zi->write_json(depth + 2, of);
+			zi->write_json(of, depth + 2);
 			++zi;
 		}
 		else
@@ -151,33 +148,29 @@ void TEC_FILE_LOG::write_json(int depth, std::ofstream &of)
 			of << i->c_str() << std::endl;
 		}
 	}
-
-	if (newfile)
-	{
-		of.close();
-	}
 }
 
-void TEC_FILE_LOG::write_xml(int depth, std::ofstream &of)
+void TEC_FILE_LOG::write_xml(int depth)
 {
-	bool newfile = !of.is_open();
-	if (newfile)
+	std::ofstream of;
+	of.open((FilePath + "/" + FileName + ".xml").c_str());
+	if (!of)
 	{
-		of.clear();
-		of.open((FilePath + "/" + FileName + ".xml").c_str());
-		if (!of)
-		{
-			throw std::runtime_error(std::string("can not open file ") + (FilePath + "/" + FileName + ".xml"));
-		}
-		of << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" << std::endl;
+		throw std::runtime_error(std::string("can not open file ") + (FilePath + "/" + FileName + ".xml"));
 	}
+	of << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" << std::endl;
+	write_xml(of, depth);
+	of.close();
+}
 
+void TEC_FILE_LOG::write_xml(std::ofstream &of, int depth)
+{
 	std::vector<TEC_ZONE_LOG>::iterator zi = Zones.begin();
 	for (std::vector<std::string>::iterator i = Xml_Text.begin(); i != Xml_Text.end(); ++i)
 	{
 		if (i->compare("#ZONE#") == 0)
 		{
-			zi->write_xml(depth + 2, of);
+			zi->write_xml(of, depth + 2);
 			++zi;
 		}
 		else
@@ -188,11 +181,6 @@ void TEC_FILE_LOG::write_xml(int depth, std::ofstream &of)
 			}
 			of << i->c_str() << std::endl;
 		}
-	}
-
-	if (newfile)
-	{
-		of.close();
 	}
 }
 
@@ -335,43 +323,40 @@ TEC_ZONE_LOG::TEC_ZONE_LOG() {}
 
 TEC_ZONE_LOG::TEC_ZONE_LOG(const TEC_ZONE & zone) : TEC_ZONE_BASE(zone) {}
 
+void TEC_ZONE_LOG::write_echo()
+{
+	std::ofstream of;
+	of.open(("./Zone_" + ZoneName + ".txt").c_str());
+	if (!of)
+	{
+		throw std::runtime_error(std::string("can not open file ") + ("./Zone_" + ZoneName + ".txt"));
+	}
+	write_echo(of);
+	of.close();
+}
+
 void TEC_ZONE_LOG::write_echo(std::ofstream &of)
 {
-	bool newfile = !of.is_open();
-	if (newfile)
-	{
-		of.clear();
-		of.open(("./Zone_" + ZoneName + ".txt").c_str());
-		if (!of)
-		{
-			throw std::runtime_error(std::string("can not open file ") + ("./Zone_" + ZoneName + ".txt"));
-		}
-	}
-
 	for (std::vector<std::string>::iterator i = Echo_Text.begin(); i != Echo_Text.end(); ++i)
 	{
 		of << i->c_str() << std::endl;
 	}
-
-	if (newfile)
-	{
-		of.close();
-	}
 }
 
-void TEC_ZONE_LOG::write_json(int depth, std::ofstream &of)
+void TEC_ZONE_LOG::write_json(int depth)
 {
-	bool newfile = !of.is_open();
-	if (newfile)
+	std::ofstream of;
+	of.open(("./Zone_" + ZoneName + ".json").c_str());
+	if (!of)
 	{
-		of.clear();
-		of.open(("./Zone_" + ZoneName + ".json").c_str());
-		if (!of)
-		{
-			throw std::runtime_error(std::string("can not open file ") + ("./Zone_" + ZoneName + ".json"));
-		}
+		throw std::runtime_error(std::string("can not open file ") + ("./Zone_" + ZoneName + ".json"));
 	}
+	write_json(of, depth);
+	of.close();
+}
 
+void TEC_ZONE_LOG::write_json(std::ofstream &of, int depth)
+{
 	for (std::vector<std::string>::iterator i = Json_Text.begin(); i != Json_Text.end(); ++i)
 	{
 		for (int j = 0; j != depth; j++)
@@ -380,27 +365,23 @@ void TEC_ZONE_LOG::write_json(int depth, std::ofstream &of)
 		}
 		of << i->c_str() << std::endl;
 	}
-
-	if (newfile)
-	{
-		of.close();
-	}
 }
 
-void TEC_ZONE_LOG::write_xml(int depth, std::ofstream &of)
+void TEC_ZONE_LOG::write_xml(int depth)
 {
-	bool newfile = !of.is_open();
-	if (newfile)
+	std::ofstream of;
+	of.open(("./Zone_" + ZoneName + ".xml").c_str());
+	if (!of)
 	{
-		of.clear();
-		of.open(("./Zone_" + ZoneName + ".xml").c_str());
-		if (!of)
-		{
-			throw std::runtime_error(std::string("can not open file ") + ("./Zone_" + ZoneName + ".xml"));
-		}
-		of << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" << std::endl;
+		throw std::runtime_error(std::string("can not open file ") + ("./Zone_" + ZoneName + ".xml"));
 	}
+	of << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" << std::endl;
+	write_xml(of, depth);
+	of.close();
+}
 
+void TEC_ZONE_LOG::write_xml(std::ofstream &of, int depth)
+{
 	for (std::vector<std::string>::iterator i = Xml_Text.begin(); i != Xml_Text.end(); ++i)
 	{
 		for (int j = 0; j != depth; j++)
@@ -408,11 +389,6 @@ void TEC_ZONE_LOG::write_xml(int depth, std::ofstream &of)
 			of << "\t";
 		}
 		of << i->c_str() << std::endl;
-	}
-
-	if (newfile)
-	{
-		of.close();
 	}
 }
 
@@ -473,7 +449,9 @@ void TEC_ZONE_LOG::read_xml(const tinyxml2::XMLElement * zone_root)
 		int tp_temp;
 		temp->QueryIntAttribute("type", &tp_temp);
 		(Data.end() - 1)->type = TEC_DATA_BASE::TEC_TYPE(tp_temp);
-		temp->QueryUnsignedAttribute("size_i", &((Data.end() - 1)->size));
+		unsigned int si_temp;
+		temp->QueryUnsignedAttribute("size_i", &si_temp);
+		(Data.end() - 1)->size = si_temp;
 		std::string pt_temp = temp->Attribute("file_pt");
 		(Data.end() - 1)->file_pt = std::strtol(pt_temp.c_str(),'\0',10);
 		temp->QueryDoubleAttribute("min", &((Data.end() - 1)->min));
