@@ -5,12 +5,16 @@
 *.ipdb
 *.exe
 *.obj
+*.o
 *.idb
 *.plt
 *.lib
 *.log
 *.json
 *.opendb
+lib/
+Fortran/test/ex1/ex1
+Fortran/test/ex1/ex2
 C++/test/.vs/
 C++/test/test.VC.db
 C++/test/test_01/test_01.vcxproj.user

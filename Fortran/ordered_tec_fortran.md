@@ -7,7 +7,7 @@ Ordered_tec is a simple pack writing ordered data (structural data) to a binary 
 * [PENF](https://github.com/szaghi/PENF), Portability Environment for Fortran poor people
 * [StringiFor](https://github.com/szaghi/StringiFor), Strings Fortran Manipulator with steroids
 
-### note on updates
+### Note on updates
 The local third party libraries can be updated by the end-user by means of the provided update.sh or updata_cn.sh script, see install section for more details.
 ## Features
 
@@ -135,7 +135,7 @@ yCoor=tec_data(y, expand='i', dim=20) ! 20 by 30 data.
 ```
 then, you can generate a 2D grid use `x` and `y` array conveniently.
 ```fortran
-tecfile%zone(1)%AddData([Xcoor, Ycoor])
+call tecfile%zone(1)%AddData([Xcoor, Ycoor])
 ```
 
 For 3D grid, you can use:
@@ -147,7 +147,7 @@ call tecfile%zones(1)%AddData([tec_data(y, expand='ik', dim=[20, 40]), &
                                tec_data(z, expand='ij', dim=[20, 30])])
 ```
 ### TODO
-* [ ] Automatically checking the data adding for constructing the zone rank and shape.
+* [x] Automatically checking the data adding for constructing the zone rank and shape.
 * [ ] Some toolkit such as converting a PLOT3D file to a binary tecplot file.
 * [ ] Testing Cases.
 * [ ] Documents

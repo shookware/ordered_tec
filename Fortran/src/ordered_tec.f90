@@ -850,11 +850,25 @@ module ordered_tec
       type(tec_data), allocatable :: Temp(:)
       integer(I4P) :: n, i
 
+
       if(.not. allocated(this%datas)) then
+        if( any(this%shape /= shape(data%data)))then
+          write(*,*)'ZONE('//This%zoneName//'): The shape of the DATA &
+          &     into the ZONE is not equal to the pre-assignment or is not &
+          &     pre-assigned.The shape of the DATA is adopted.'
+          write(*,*)'The DATA number is', 1
+          this%shape=shape(data%data)
+        endif
         allocate(this%datas(1))
         this%datas(1) = data
       else
         n = size(this%datas, dim=1)
+        if( any(this%shape /= shape(data%data))) then
+          write(*,*)'ZONE('//This%zoneName//'): The shape of the DATA into the &
+          &     ZONE is not equal to the shape of other DATA. Please Check it.'
+          write(*,*)'The DATA number is', n+1
+          stop
+        endif
         allocate(Temp(n+1))
         do i=1, n
           Temp(i) = this%datas(i)
@@ -877,10 +891,33 @@ module ordered_tec
 
       num = size(data, dim=1)
       if(.not. allocated(this%datas)) then
+        if( any(this%shape /= shape(data(1)%data)))then
+          write(*,*)'ZONE('//This%zoneName//'): The shape of the DATA into the &
+          &     ZONE is not equal to the pre-assignment or is not pre-assigned.&
+          &     The shape of the DATA is adopted.'
+          write(*,*)'The DATA number is', 1
+          this%shape=shape(data(1)%data)
+        endif
+        do i=2, num
+          if( any(this%shape /= shape(data(i)%data))) then
+            write(*,*)'ZONE('//This%zoneName//'): The shape of the DATA into the &
+            &     ZONE is not equal to the shape of other DATA. Please Check it.'
+            write(*,*)'The DATA number is', i
+            stop
+          endif
+        enddo
         allocate(this%datas(num))
         this%datas(1:num) = data(1:num)
       else
         n = size(this%datas, dim=1)
+        do i=1, num
+          if( any(this%shape /= shape(data(i)%data))) then
+            write(*,*)'ZONE('//This%zoneName//'): The shape of the DATA into the &
+            &     ZONE is not equal to the shape of other DATA. Please Check it.'
+            write(*,*)'The DATA number is', i+n
+            stop
+          endif
+        enddo
         allocate(Temp(n+num))
         do i=1, n
           Temp(i) = this%datas(i)
@@ -1242,20 +1279,22 @@ module ordered_tec
       class(tec_data), intent(in) :: this
       integer(I4P), intent(in) :: s(3), e(3), skip(3)
       integer(I4P), intent(in) :: iounit
+      integer :: i, j, k
 
       select type (data => this%data)
       type is (real(R4P))
-        write(iounit)data(s(1):e(1):skip(1), &
-                      &  s(2):e(2):skip(2), &
-                      &  s(3):e(3):skip(3))
+        write(iounit)(((data(i, j, k), i=s(1), e(1), skip(1)), &
+                            &          j=s(2), e(2), skip(2)), &
+                            &          k=s(3), e(3), skip(3))
+
       type is (real(R8P))
-        write(iounit)data(s(1):e(1):skip(1), &
-                      &  s(2):e(2):skip(2), &
-                      &  s(3):e(3):skip(3))
+        write(iounit)(((data(i, j, k), i=s(1), e(1), skip(1)), &
+                            &          j=s(2), e(2), skip(2)), &
+                            &          k=s(3), e(3), skip(3))
       type is (integer(I4P))
-        write(iounit)data(s(1):e(1):skip(1), &
-                      &  s(2):e(2):skip(2), &
-                      &  s(3):e(3):skip(3))
+        write(iounit)(((data(i, j, k), i=s(1), e(1), skip(1)), &
+                            &          j=s(2), e(2), skip(2)), &
+                            &          k=s(3), e(3), skip(3))
       class default
         stop "Data Type is not defined"
       end select
@@ -1316,39 +1355,39 @@ module ordered_tec
 
 end module ordered_tec
 
-!-----------------------------------------------------------------------
-!Main program test
-!-----------------------------------------------------------------------
-program test
-use ordered_tec
-use penf
-implicit none
-
-! contains
-type(tec_file) :: tecfile, tecflow
-real :: x(5)=[1.0d0, 2.0d0, 3.0d0, 4.0d0, 5.0d0]
-real :: y(6)=[2.0d0, 3.0d0, 4.0d0, 5.0d0, 6.0d0, 7.0d0]
-real :: z(7)=[3.0d0, 4.0d0, 5.0d0, 6.0d0, 7.0d0, 8.0d0, 9.0d0]
-
-tecfile=tec_file(name='test.plt',path='.',title='TestFile', filetype='GRID')
-call tecfile%addVar(['x','y'])
-call tecfile%addVar('z')
-call tecfile%AddAuxiliaryData('Re', '1.0e7')
-call tecfile%AddAuxiliaryData('Ma', 7.0d0)
-call tecfile%AddZone(tec_zone())
-tecfile%zones(1)%shape=[5,6,7]
-call tecfile%zones(1)%AddData(tec_data(x, expand='jk', dim=[6, 7]))
-call tecfile%zones(1)%AddData([tec_data(y, expand='ik', dim=[5, 7]), &
-                               tec_data(z, expand='ij', dim=[5, 6])])
-call tecfile%WritePlt()
-call tecfile%finalize()
-
-tecfile=tec_file(name='flow.plt',path='.',title='TestFile', filetype='SOLUTION')
-call tecfile%addVar('vel')
-call tecfile%AddZone(tec_zone())
-tecfile%zones(1)%shape=[5,6,7]
-call tecfile%zones(1)%AddData(tec_data(x, expand='jk', dim=[6, 7]))
-call tecfile%WritePlt()
-call tecfile%finalize()
-
-end program test
+! !-----------------------------------------------------------------------
+! !Main program test
+! !-----------------------------------------------------------------------
+! program test
+! use ordered_tec
+! use penf
+! implicit none
+!
+! ! contains
+! type(tec_file) :: tecfile, tecflow
+! real :: x(5)=[1.0d0, 2.0d0, 3.0d0, 4.0d0, 5.0d0]
+! real :: y(6)=[2.0d0, 3.0d0, 4.0d0, 5.0d0, 6.0d0, 7.0d0]
+! real :: z(7)=[3.0d0, 4.0d0, 5.0d0, 6.0d0, 7.0d0, 8.0d0, 9.0d0]
+!
+! tecfile=tec_file(name='test.plt',path='.',title='TestFile', filetype='GRID')
+! call tecfile%addVar(['x','y'])
+! call tecfile%addVar('z')
+! call tecfile%AddAuxiliaryData('Re', '1.0e7')
+! call tecfile%AddAuxiliaryData('Ma', 7.0d0)
+! call tecfile%AddZone(tec_zone())
+! tecfile%zones(1)%shape=[5,6,7]
+! call tecfile%zones(1)%AddData(tec_data(x, expand='jk', dim=[6, 7]))
+! call tecfile%zones(1)%AddData([tec_data(y, expand='ik', dim=[5, 7]), &
+!                                tec_data(z, expand='ij', dim=[5, 6])])
+! call tecfile%WritePlt()
+! call tecfile%finalize()
+!
+! tecfile=tec_file(name='flow.plt',path='.',title='TestFile', filetype='SOLUTION')
+! call tecfile%addVar('vel')
+! call tecfile%AddZone(tec_zone())
+! tecfile%zones(1)%shape=[5,6,7]
+! call tecfile%zones(1)%AddData(tec_data(x, expand='jk', dim=[6, 7]))
+! call tecfile%WritePlt()
+! call tecfile%finalize()
+!
+! end program test
