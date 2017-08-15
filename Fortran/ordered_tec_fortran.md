@@ -27,18 +27,18 @@ The local third party libraries can be updated by the end-user by means of the p
 
 ### Install
 | [Download](#download) | [Update the third party libraries](#update) | [Build libraries](#build) | [Build toolkit](#toolkit)
-<div id="download"></div>
+<a name='download'></a>
 #### Download
 you can clone it by git.
-<div id="update"></div>
+<a name='update'></a>
 #### Update the third party libraries
 The third party libraries are adoped in this code. Then, it can be update by running the srcipt update.sh. It can automatically download the libraries and update the source codes. The user in china can use update_cn.sh for a faster downloading.
-<div id="build"></div>
+<a name='build'></a>
 #### Build libraries
 Building here support the GNU make. Then, you can type `make tec_lib` in the terminal for building it.
-<div id="toolkit"></div>
+<a name='toolkit'></a>
 #### Build toolkit (TODO)
-Writing
+Under developing
 ### Coding
 The Tecplot file consists of zones and data are storage in zone. Zones describe different set of data in space or in time. All the numbers of data in different zones in one file are same. Auxiliary data is extra data attached to file or zone which can be seen and used in Tecplot.
 
