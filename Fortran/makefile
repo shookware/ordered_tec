@@ -15,7 +15,9 @@ SRC_DIR_BeFoR64 = ./src/BeFoR64/
 SRC_DIR_PENF = ./src/PENF/
 SRC_DIR_MAIN = ./src/
 SRC_DIR_StringiFor = ./src/StringiFor/
+SRC_DIR_TOOLKIT = ./src/toolkit/
 TESTS_DIR = ./test/
+
 OBJS_DIR = ./obj/
 MODS_DIR = ./mod/
 EXE_DIR = ./
@@ -35,7 +37,7 @@ OBJS_StringiFor = $(SRCS_StringiFor:.F90=.o)
 VPATH = $(SRC_DIR_BeFoR64):$(OBJS_DIR):$(SRC_DIR_PENF):$(OBJS_DIR):$(SRC_DIR_MAIN):$(OBJS_DIR):$(SRC_DIR_StringiFor):$(OBJS_DIR)
 OBJS = $(addprefix $(OBJS_DIR), $(OBJS_BeFoR64) $(OBJS_PENF) $(OBJS_MAIN) $(OBJS_StringiFor))
 
-EX := $(foreach n, 1, ex$(n))
+EX := $(foreach n, 1 2, ex$(n))
 EX_OBJS := $(EX:=.o)
 
 all : $(EXE)
@@ -57,6 +59,7 @@ test : $(EX)
 
 $(EX): tec_lib $(EX_OBJS)
 	$(FC) -I $(MODS_DIR) -ltec_file -L $(LIB_DIR) -o $(TESTS_DIR)$@/$@ $(OBJS_DIR)$@.o
+	@rm -f $(OBJS_DIR)$@.o
 $(EX_OBJS):
 	$(FC) $(CFLAGS) -c $(TESTS_DIR)$(@:.o=)/$(@:.o=.f90) -o $(OBJS_DIR)$@
 

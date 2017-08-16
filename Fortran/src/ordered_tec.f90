@@ -301,10 +301,6 @@ module ordered_tec
         integer, intent(in) :: dim
         type(tec_data) :: this
 
-        print*, shape(spread(idata, 1, dim))
-        print*, shape(spread(idata, 2, dim))
-        pause
-
         select case (expand)
         case ("i")
           this=tec_data(spread(idata, 1, dim))
@@ -372,7 +368,7 @@ module ordered_tec
         shape(3)=1
 
         allocate(this%data, source=reshape(idata, shape))
-        this%typeValue = 1
+        this%typeValue = 2
 
     end function tec_data_define_r8p_1d
 
@@ -390,7 +386,7 @@ module ordered_tec
         shape(3)=1
 
         allocate(this%data, source=reshape(idata, shape))
-        this%typeValue = 1
+        this%typeValue = 2
 
     end function tec_data_define_r8p_2d
 
@@ -407,8 +403,8 @@ module ordered_tec
         shape(2)=size(idata, dim=2)
         shape(3)=size(idata, dim=3)
 
-        allocate(this%data, source=reshape(idata, shape))
-        this%typeValue = 1
+        allocate(this%data, source=idata)
+        this%typeValue = 2
 
     end function tec_data_define_r8p_3d
 
@@ -419,10 +415,6 @@ module ordered_tec
         character(len=1), intent(in) :: expand
         integer, intent(in) :: dim
         type(tec_data) :: this
-
-        print*, shape(spread(idata, 1, dim))
-        print*, shape(spread(idata, 2, dim))
-        pause
 
         select case (expand)
         case ("i")
@@ -491,7 +483,7 @@ module ordered_tec
         shape(3)=1
 
         allocate(this%data, source=reshape(idata, shape))
-        this%typeValue = 1
+        this%typeValue = 3
 
     end function tec_data_define_i4p_1d
 
@@ -509,7 +501,7 @@ module ordered_tec
         shape(3)=1
 
         allocate(this%data, source=reshape(idata, shape))
-        this%typeValue = 1
+        this%typeValue = 3
 
     end function tec_data_define_i4p_2d
 
@@ -526,8 +518,8 @@ module ordered_tec
         shape(2)=size(idata, dim=2)
         shape(3)=size(idata, dim=3)
 
-        allocate(this%data, source=reshape(idata, shape))
-        this%typeValue = 1
+        allocate(this%data, source=idata)
+        this%typeValue = 3
 
     end function tec_data_define_i4p_3d
 
@@ -538,10 +530,6 @@ module ordered_tec
         character(len=1), intent(in) :: expand
         integer, intent(in) :: dim
         type(tec_data) :: this
-
-        print*, shape(spread(idata, 1, dim))
-        print*, shape(spread(idata, 2, dim))
-        pause
 
         select case (expand)
         case ("i")
@@ -850,12 +838,11 @@ module ordered_tec
       type(tec_data), allocatable :: Temp(:)
       integer(I4P) :: n, i
 
-
       if(.not. allocated(this%datas)) then
         if( any(this%shape /= shape(data%data)))then
-          write(*,*)'ZONE('//This%zoneName//'): The shape of the DATA &
-          &     into the ZONE is not equal to the pre-assignment or is not &
-          &     pre-assigned.The shape of the DATA is adopted.'
+          write(*,*)'ZONE('//This%zoneName//'): The shape of the DATA into '// &
+          &         'the ZONE is not equal to the pre-assignment or is not '// &
+          &         'pre-assigned. The shape of the DATA is adopted.'
           write(*,*)'The DATA number is', 1
           this%shape=shape(data%data)
         endif
@@ -864,8 +851,9 @@ module ordered_tec
       else
         n = size(this%datas, dim=1)
         if( any(this%shape /= shape(data%data))) then
-          write(*,*)'ZONE('//This%zoneName//'): The shape of the DATA into the &
-          &     ZONE is not equal to the shape of other DATA. Please Check it.'
+          write(*,*)'ZONE('//This%zoneName//'): The shape of the DATA into'//&
+          &         ' the ZONE is not equal to the shape of other DATA. '// &
+          &         'Please Check it.'
           write(*,*)'The DATA number is', n+1
           stop
         endif
@@ -892,16 +880,17 @@ module ordered_tec
       num = size(data, dim=1)
       if(.not. allocated(this%datas)) then
         if( any(this%shape /= shape(data(1)%data)))then
-          write(*,*)'ZONE('//This%zoneName//'): The shape of the DATA into the &
-          &     ZONE is not equal to the pre-assignment or is not pre-assigned.&
-          &     The shape of the DATA is adopted.'
+          write(*,*)'ZONE('//This%zoneName//'): The shape of the DATA into '// &
+          &         'the ZONE is not equal to the pre-assignment or is not '// &
+          &         'pre-assigned. The shape of the DATA is adopted.'
           write(*,*)'The DATA number is', 1
           this%shape=shape(data(1)%data)
         endif
         do i=2, num
           if( any(this%shape /= shape(data(i)%data))) then
-            write(*,*)'ZONE('//This%zoneName//'): The shape of the DATA into the &
-            &     ZONE is not equal to the shape of other DATA. Please Check it.'
+            write(*,*)'ZONE('//This%zoneName//'): The shape of the DATA into'//&
+            &         ' the ZONE is not equal to the shape of other DATA. '// &
+            &         'Please Check it.'
             write(*,*)'The DATA number is', i
             stop
           endif
@@ -912,8 +901,9 @@ module ordered_tec
         n = size(this%datas, dim=1)
         do i=1, num
           if( any(this%shape /= shape(data(i)%data))) then
-            write(*,*)'ZONE('//This%zoneName//'): The shape of the DATA into the &
-            &     ZONE is not equal to the shape of other DATA. Please Check it.'
+            write(*,*)'ZONE('//This%zoneName//'): The shape of the DATA into'//&
+            &         ' the ZONE is not equal to the shape of other DATA. '// &
+            &         'Please Check it.'
             write(*,*)'The DATA number is', i+n
             stop
           endif
@@ -946,9 +936,19 @@ module ordered_tec
           write(*,*)'Zone '//this%zoneName//':'//INDEX(i)//' Max cannot be zero'
           stop
         endif
-        if(this%begin(i)+this%end(i)>=this%shape(i)) then
-          write(*,*)'Zone '//this%zoneName//': sum of '//INDEX(i)// &
-        & ' Begin and '//INDEX(i)//' End is not smaller than '//INDEX(i)//' Max'
+        if((this%begin(i) >= this%end(i)) .and. (this%end(i)/=0)) then
+          write(*,*)'Zone '//this%zoneName//': '//INDEX(i)// &
+        & ' Begin is not bigger than '//INDEX(i)//' End', this%begin(i), this%end(i)
+          stop
+        endif
+        if(this%begin(i)>=this%shape(i)) then
+          write(*,*)'Zone '//this%zoneName//': '//INDEX(i)// &
+        & ' Begin is not bigger than '//INDEX(i)//' Max'
+          stop
+        endif
+        if(this%end(i)>this%shape(i)) then
+          write(*,*)'Zone '//this%zoneName//': '//INDEX(i)// &
+        & ' End is not smaller than '//INDEX(i)//' Max'
           stop
         endif
       enddo
@@ -965,11 +965,10 @@ module ordered_tec
                & begin    => this%begin, &
                & end      => this%end, &
                & skip     => this%skip )
+        where(begin==0) begin=1
+        where(end==0) end=shape
         do i=3, 1, -1
-          realMax(i)=(shape(i)-begin(i)-end(i))/skip(i)
-
-          if(mod((shape(i)-begin(i)-end(i)), skip(i))) &
-            & realMax(i)=realMax(i)+1
+          realMax(i)=(end(i)-begin(i))/skip(i)+1
           if(realMax(i)==1) this%realDim=this%realDim-1
         enddo
       end associate
@@ -1128,8 +1127,8 @@ module ordered_tec
           stop
         endif
         if(size(this%datas, dim=1) /= size(thisfile%variables, dim=1))then
-          write(*,*)"Zone "//this%zoneName//":the size of data is not equal to &
-            &       the size of variables of the file"
+          write(*,*)"Zone "//this%zoneName//":the size of data is not equal"// &
+          &         " to the size of variables of the file"
           stop
         endif
         do i=1, size(this%datas, dim=1)
@@ -1265,8 +1264,8 @@ module ordered_tec
         do i=1, n
           s=begin
           e=end
-          where (s == 0) s = 1
-          where (e == 0) e = this%shape
+!          where (s == 0) s = 1
+!          where (e == 0) e = this%shape
           call datas(i)%WritePltData(s, e, skip, iounit)
         enddo
       end associate
