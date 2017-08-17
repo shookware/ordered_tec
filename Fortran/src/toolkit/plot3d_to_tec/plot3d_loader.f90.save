@@ -31,7 +31,6 @@ module plot3d_loader
     type(string) :: gridFile
     type(string) :: flowFile
     type(string) :: nmlFile
-    type(string), allocatable :: zoneNames(:)
 
     type(string) :: accessType
     type(string) :: formType
@@ -47,8 +46,6 @@ module plot3d_loader
 
   contains
 
-    procedure, private :: GridLoader => Plot3dGridLoader
-    procedure, private :: FlowLoader => Plot3dFlowLoader
     procedure, private :: BlockNumLoader
     procedure, private :: LoadGridArray_r8p
     procedure, private :: LoadGridArray_r4p
@@ -77,16 +74,13 @@ module plot3d_loader
       character(len=99) :: GridName
       character(len=99) :: flowName
       type(string) :: flowname_
-      type(string) :: ext
       character(len=99) :: formType
       character(len=99) :: blockType
       character(len=99) :: solutionType
       character(len=99) :: realType
       character(len=99) :: varName
       type(string) :: varname_
-      character(len=99) :: corName
-      character(len=99) :: dimNum
-      type(string) :: corname_
+
 
       integer :: error
 
@@ -101,56 +95,38 @@ module plot3d_loader
                  & required=.true., act='store')
       call cli%add(switch='--flow', switch_ab='-f', help='flow name', &
                  & required=.false., act='store', def='null')
-      call cli%add(switch='--form', switch_ab='-F', help='formatted/unformatted/binary', &
+      call cli%add(switch='--form', switch_ab='-m', help='formatted/unformatted/binary', &
                  & def='default')
       call cli%add(switch='--block', switch_ab='-b', help='blk/nblk', required=.false., def='default')
       call cli%add(switch='--flowtype', switch_ab='-q', help='Q/function solution file', required=.false., def='default')
       call cli%add(switch='--real', switch_ab='-r', help='8/4: real(8)/real(4)', required=.false., def='8')
-      call cli%add(switch='--var', switch_ab='-V', help='var name', required=.false., def='null')
-      call cli%add(switch='--cor', switch_ab='-c', help='coord name', required=.false., def='null')
-      call cli%add(switch='--dim', switch_ab='-d', help='dimension number', required=.false., def='3')
+      call cli%add(switch='--var', switch_ab='-v', help='var name', required=.false., def='null')
 
-      call cli%get(switch='-g',val=GridName, error=error) ;       if (error/=0) stop
+      call cli%get(switch='-g',val=GridName, error=error) ; if (error/=0) stop
       call cli%get(switch='-f',val=flowName, error=error) ; if (error/=0) stop
-      call cli%get(switch='-F',val=formType, error=error) ; if (error/=0) stop
+      call cli%get(switch='-m',val=formType, error=error) ; if (error/=0) stop
       call cli%get(switch='-b',val=blockType, error=error) ; if (error/=0) stop
       call cli%get(switch='-q',val=solutionType, error=error) ; if (error/=0) stop
       call cli%get(switch='-r',val=RealType, error=error) ; if (error/=0) stop
-      call cli%get(switch='-V',val=varName, error=error) ; if (error/=0) stop
-      call cli%get(switch='-c',val=corName, error=error) ; if (error/=0) stop
-      call cli%get(switch='-d',val=dimNum, error=error) ; if (error/=0) stop
+      call cli%get(switch='-v',val=varName, error=error) ; if (error/=0) stop
       plot3d%gridfile=trim(gridname)
       plot3d%flowfile=trim(flowname)
-      flowname_=trim(flowname)
-      ext=flowname_%extension()
-
       select case (trim(formType))
           case ('formatted')
             plot3d%formType='formatted'
             plot3d%accessType='sequential'
           case ('unformatted')
             plot3d%formType='unformatted'
-            plot3d%accessType='sequential'
+            plot3d%accessType='direct'
           case ('binary')
             plot3d%formType='unformatted'
             plot3d%accessType='stream'
           case ('default')
-            select case (ext//'')
-                case ('bin')
-                    plot3d%formType='unformatted'
-                    plot3d%accessType='stream'
-                case ('dat')
-                    plot3d%formType='unformatted'
-                    plot3d%accessType='sequential'
-                case default
-                    plot3d%formType='unformatted'
-                    plot3d%accessType='stream'
-            end select
+            plot3d%formType='unformatted'
+            plot3d%accessType='stream'
           case default
             write(*,*)'Error: The file format is error!', trim(formtype)
             write(*, *)'binary is adopted'
-            plot3d%formType='unformatted'
-            plot3d%accessType='sequential'            
       end select
       select case (trim(blockType))
           case ('blk')
@@ -159,7 +135,7 @@ module plot3d_loader
             plot3d%isBlock=.False.
             plot3d%blocknum=1
           case ('default')
-            plot3d%isBlock=.True.
+            plot3d%isBlock=.False.
             plot3d%blocknum=1
           case default
             write(*,*)'Error: The block type is error!', trim(blocktype)
@@ -169,17 +145,11 @@ module plot3d_loader
       end select
       select case (trim(solutionType))
           case ('default')
-            select case (ext//'')
-                case ('q', 'Q')
-                    plot3d%isQ=.True.
-                case ('bin', 'dat')
-                    plot3d%isQ=.False.
-                case default
-                    plot3d%isQ=.False.
-            end select
-          case ('q', 'Q')
+            flowname_=flowname
+            
+          case ('q')
             plot3d%isQ=.True.
-          case ('fun', 'FUN', 'Fun')
+          case ('fun')
             plot3d%isQ=.False.
           case default
             write(*,*)'Error: The solution type is error!', trim(solutionType)
@@ -192,53 +162,26 @@ module plot3d_loader
           case ('4')
             plot3d%isReal8=.False.
           case default
-            write(*,*)'Error: The data type is error!real', trim(realType)
+            write(*,*)'Error: The data type is error!real', trim(solutionType)
             write(*,*)'real8 is adopted'
             plot3d%isReal8=.True.
       end select
-      select case (trim(dimNum))
-          case ('1', '1d', '1D')
-            plot3d%rank=1
-          case ('2', '2d', '2D')
-            plot3d%rank=2
-          case ('3', '3d', '3D')
-            plot3d%rank=3
-          case default
-            write(*,*)'Error: The dimension is error!', trim(dimNum)
-            write(*,*)'3D is adopted'
-            plot3d%rank=3
-      end select
-
 
       varname_=trim(varname)
-      if(varname_=='null')then
-        if(plot3d%isQ) then
-            varname_='<greek>r</greek>, <greek>r</greek>U, <greek>r</greek>V, &
-                      <greek>r</greek>W, E'
-        else
-            varname_='<greek>r</greek>, U, V, W, T'
-        end if
-      endif
-      call varname_%split(tokens=plot3d%flow%varName, sep=', ')
+      call varname_%split(tokens=plot3d%flow%varName, sep=' ')
 
-      corname_=trim(corname)
-      if(corname_=='null')then
-        select case (plot3d%rank)
-            case (3)
-                corname_='x, y, z'
-            case (2)
-                corname_='x, y'
-            case (1)
-                corname_='x'
-        end select
-      endif
-      call corname_%split(tokens=plot3d%grid%coordName, sep=', ')
 
-      call plot3d%GridLoader()
 
-      if(trim(flowName)/='null')then
-        call plot3d%FlowLoader()
-      end if
+
+
+      pause
+
+
+
+
+
+
+
 
     end function plot3d_con
 
@@ -275,18 +218,19 @@ module plot3d_loader
         &       isFormatted => this%isFormatted, &
         &       isWhole    => this%isWhole, &
         &       isReal8    => this%isReal8, &
+        &       in         => this%in,      &
         &       rank       => this%rank)
         open(newunit=iounit, file=gridFile//'', &
         &    access=accessType//'', form=formType//'', iostat=ios, &
         &    status="old", action="read")
         if (ios /= 0) stop "Error opening file Plot3dGird"
         if(isBlock) call this%BlockNumLoader(iounit)
-        allocate(this%in(blockNum, 3))
-        this%in=1
+        allocate(this%in(blockNum, rank))
+        in=1
         if(isFormatted) then
-          read(iounit, *)((this%in(i, j), j=1, rank), i=1, blockNum)
+          read(iounit, *)((in(i, j), j=1, rank), i=1, blockNum)
         elseif(this%formType=='unformatted') then
-          read(iounit)((this%in(i, j), j=1, rank), i=1, blockNum)
+          read(iounit)((in(i, j), j=1, rank), i=1, blockNum)
         endif
         if(isReal8) then
           call this%LoadGridArray_r8p(iounit)
@@ -363,16 +307,16 @@ module plot3d_loader
         &       isFormatted=> this%isFormatted)
         allocate(this%grid%x(blockNum, rank))
         do l=1, blockNum
-          allocate(X(in(l, 1), in(l, 2), in(l, 3), rank))
+          allocate(X(in(1, l), in(2, l), in(3, l), rank))
           if(isWhole)then
-            k1=1; k2=in(l,3)
+            k1=1; k2=in(3,l)
           else
-            k1=in(l,3); k2=1
+            k1=in(3,l); k2=1
           endif
-          call ArrayLoader(iounit, in(l, 1), in(l, 2), k1, k2, rank, &
+          call ArrayLoader(iounit, in(1, l), in(2, l), k1, k2, rank, &
           &               isFormatted, X)
           do lrank=1, rank
-            this%grid%x(l, lrank)=tec_data(X(:,:,:, lrank))
+            this%grid%x(lrank, l)=tec_data(X(:,:,:, lrank))
           enddo
           deallocate(X)
         enddo
@@ -396,16 +340,16 @@ module plot3d_loader
         &       isFormatted=> this%isFormatted)
         allocate(this%grid%x(blockNum, rank))
         do l=1, blockNum
-          allocate(X(in(l, 1), in(l, 2), in(l, 3), rank))
+          allocate(X(in(1, l), in(2, l), in(3, l), this%flow%ln(l)))
           if(isWhole)then
-            k1=1; k2=in(l,3)
+            k1=1; k2=in(3,l)
           else
-            k1=in(l,3); k2=1
+            k1=in(3,l); k2=1
           endif
-          call ArrayLoader(iounit, in(l, 1), in(l, 2), k1, k2, rank, &
+          call ArrayLoader(iounit, in(1, l), in(2, l), k1, k2, rank, &
           &               isFormatted, X)
           do lrank=1, rank
-            this%grid%x(l, lrank)=tec_data(X(:,:,:, lrank))
+            this%grid%x(lrank, l)=tec_data(X(:,:,:, lrank))
           enddo
           deallocate(X)
         enddo

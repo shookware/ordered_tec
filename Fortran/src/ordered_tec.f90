@@ -139,11 +139,11 @@ module ordered_tec
         procedure :: WritePlt => WritePlt_file
         procedure :: Finalize => Finalize_file
 
-        generic :: AddVar => AddVar_single, &
+        generic, public :: AddVar => AddVar_single, &
                         &    AddVar_multi
-        generic :: AddZone => AddZone_single, &
+        generic, public :: AddZone => AddZone_single, &
                         &     AddZone_multi
-        generic :: AddAuxiliaryData => AddAuxiliaryDataString_file, &
+        generic, public :: AddAuxiliaryData => AddAuxiliaryDataString_file, &
                                     &  AddAuxiliaryDataDouble_file
         !
         procedure, private :: AddAuxiliaryDataString_file
@@ -845,6 +845,7 @@ module ordered_tec
           &         'pre-assigned. The shape of the DATA is adopted.'
           write(*,*)'The DATA number is', 1
           this%shape=shape(data%data)
+          write(*,*)'The shape is', this%shape
         endif
         allocate(this%datas(1))
         this%datas(1) = data
@@ -885,6 +886,7 @@ module ordered_tec
           &         'pre-assigned. The shape of the DATA is adopted.'
           write(*,*)'The DATA number is', 1
           this%shape=shape(data(1)%data)
+          write(*,*)'The shape is', this%shape          
         endif
         do i=2, num
           if( any(this%shape /= shape(data(i)%data))) then

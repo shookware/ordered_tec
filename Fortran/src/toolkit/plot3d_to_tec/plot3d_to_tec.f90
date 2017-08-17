@@ -17,8 +17,23 @@
 program plot3d_to_tec
 ! use
 use plot3d_loader
+use ordered_tec
+
 implicit none
 
   type(plot3d_t) :: plot3d
+  type(tec_file) :: tecWriter
+  integer :: l, i
+
+  plot3d=plot3d_t()
+
+  tecWriter=tec_file(name='grid.plt',path='.',title='Grid', filetype='GRID')
+  call tecWriter%addVar([(plot3d%grid%coordName(i)//'', i=1, 3)])
+  do l=1, plot3d%blockNum
+    call tecWriter%AddZone(tec_zone('zone 1'))
+    call tecWriter%zones(1)%AddData(plot3d%grid%x(l, :))
+  enddo
+  call tecWriter%WritePlt()
+
 
 end program plot3d_to_tec
